@@ -1,0 +1,8 @@
+Customer: I ordered an iPhone 14 from Amazon, but it has not been delivered yet.
+Agent: I’m really sorry for the inconvenience. I understand your concern and I’ll help you resolve this issue as soon as possible.
+
+Customer: I ordered a Samsung Galaxy S23 from Flipkart last week, but it still hasn’t arrived.
+Agent: I’m really sorry for the delay. I completely understand your frustration and I’ll check the order status for you right away.
+
+Customer: I want to return my iPhone 13 because it arrived damaged and I need a refund.
+Agent: I apologize for the inconvenience. I understand your concern and I will initiate the refund process immediately.
