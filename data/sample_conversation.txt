@@ -1,9 +1,5 @@
-Customer: Hi, I am facing an issue with my Amazon Prime subscription.
-Customer: The payment was deducted, but my account still shows inactive.
-Agent: I’m really sorry for the inconvenience you’re experiencing.
-Agent: Let me quickly check your account details and help you resolve this.
-Customer: This has been very frustrating, and I need it fixed as soon as possible.
-Agent: I completely understand your concern and assure you this will be resolved shortly.
+Customer: This is the third time I’m contacting support. My iPhone 14 order from Amazon is still not delivered and no one has given me a clear answer.
+Agent: I sincerely apologize for the repeated inconvenience. I completely understand your frustration and I will personally escalate this issue to ensure it gets resolved quickly.
 
-Customer: I received my order from Myntra earlier than expected. Great service!
-Agent: Thank you so much for your kind feedback. We’re glad you had a great experience.
+Customer: Why was my refund request for the Lenovo laptop rejected? I returned it last week.
+Agent: I understand your concern. The refund was delayed due to a verification issue, but I’ll make sure it’s processed as soon as possible.

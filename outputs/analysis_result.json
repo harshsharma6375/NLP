@@ -1,26 +1,31 @@
 {
     "summary": {
-        "overall_sentiment": "Neutral",
-        "sentiment_score": 0.071,
-        "primary_intent": "Feedback",
-        "empathy_score": 0.3,
+        "overall_sentiment": "Negative",
+        "sentiment_reason": "Customer reports issues such as delivery delays, refund rejections, or product defects, indicating frustration.",
+        "primary_intent": "Refund Issue",
+        "intent_reason": "The interaction is focused on a request for a refund or return of a product.",
+        "empathy_score": 0.6,
         "products_detected": [
             "Amazon",
-            "Myntra"
+            "Lenovo",
+            "iPhone",
+            "iPhone 14",
+            "laptop"
         ],
-        "entity_count": 2
+        "entity_count": 3
     },
     "customer_queries": [
-        "Hi, I am facing an issue with my Amazon Prime subscription.",
-        "The payment was deducted, but my account still shows inactive.",
-        "This has been very frustrating, and I need it fixed as soon as possible.",
-        "I received my order from Myntra earlier than expected. Great service!"
+        "This is the third time I\u2019m contacting support. My iPhone 14 order from Amazon is still not delivered and no one has given me a clear answer.",
+        "Why was my refund request for the Lenovo laptop rejected? I returned it last week."
+    ],
+    "agent_responses": [
+        "I sincerely apologize for the repeated inconvenience. I completely understand your frustration and I will personally escalate this issue to ensure it gets resolved quickly.",
+        "I understand your concern. The refund was delayed due to a verification issue, but I\u2019ll make sure it\u2019s processed as soon as possible."
     ],
     "details": {
         "intents_found": [
-            "Complaint",
-            "Support Request",
-            "Feedback"
+            "Delivery Delay",
+            "Refund Issue"
         ],
         "entities": [
             {
@@ -28,8 +33,12 @@
                 "label": "ORG"
             },
             {
-                "text": "Myntra",
-                "label": "GPE"
+                "text": "Lenovo",
+                "label": "ORG"
+            },
+            {
+                "text": "last week",
+                "label": "DATE"
             }
         ]
     }
