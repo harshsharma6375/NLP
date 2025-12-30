@@ -1,3 +1,5 @@
 spacy
 textblob
-numpy<2
+numpy
+scikit-learn
+pandas

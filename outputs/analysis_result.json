@@ -1,81 +1,36 @@
 {
     "summary": {
-        "customer_intent": [
-            "general_statement",
-            "purchase"
-        ],
-        "agent_empathy_shown": true,
-        "products_mentioned": [
-            "iphone",
-            "galaxy",
-            "samsung",
-            "phone",
+        "overall_sentiment": "Neutral",
+        "sentiment_score": 0.071,
+        "primary_intent": "Feedback",
+        "empathy_score": 0.3,
+        "products_detected": [
             "Amazon",
-            "Samsung Galaxy S23",
-            "Flipkart"
+            "Myntra"
         ],
-        "entity_count": 4
+        "entity_count": 2
     },
-    "details": [
-        {
-            "speaker": "Customer",
-            "text": "I ordered an iPhone 14 from Amazon, but it has not been delivered yet.",
-            "sentiment": {
-                "polarity": 0.0,
-                "subjectivity": 0.0
+    "customer_queries": [
+        "Hi, I am facing an issue with my Amazon Prime subscription.",
+        "The payment was deducted, but my account still shows inactive.",
+        "This has been very frustrating, and I need it fixed as soon as possible.",
+        "I received my order from Myntra earlier than expected. Great service!"
+    ],
+    "details": {
+        "intents_found": [
+            "Complaint",
+            "Support Request",
+            "Feedback"
+        ],
+        "entities": [
+            {
+                "text": "Amazon",
+                "label": "ORG"
             },
-            "intent": "purchase",
-            "empathy_detected": false
-        },
-        {
-            "speaker": "Agent",
-            "text": "I\u2019m really sorry for the inconvenience. I understand your concern and I\u2019ll help you resolve this issue as soon as possible.",
-            "sentiment": {
-                "polarity": -0.25,
-                "subjectivity": 1.0
-            },
-            "intent": null,
-            "empathy_detected": true
-        },
-        {
-            "speaker": "Customer",
-            "text": "I ordered a Samsung Galaxy S23 from Flipkart last week, but it still hasn\u2019t arrived.",
-            "sentiment": {
-                "polarity": 0.0,
-                "subjectivity": 0.06666666666666667
-            },
-            "intent": "purchase",
-            "empathy_detected": false
-        },
-        {
-            "speaker": "Agent",
-            "text": "I\u2019m really sorry for the delay. I completely understand your frustration and I\u2019ll check the order status for you right away.",
-            "sentiment": {
-                "polarity": -0.038095238095238106,
-                "subjectivity": 0.6452380952380952
-            },
-            "intent": null,
-            "empathy_detected": true
-        },
-        {
-            "speaker": "Customer",
-            "text": "I want to return my iPhone 13 because it arrived damaged and I need a refund.",
-            "sentiment": {
-                "polarity": 0.0,
-                "subjectivity": 0.0
-            },
-            "intent": "general_statement",
-            "empathy_detected": false
-        },
-        {
-            "speaker": "Agent",
-            "text": "I apologize for the inconvenience. I understand your concern and I will initiate the refund process immediately.",
-            "sentiment": {
-                "polarity": 0.0,
-                "subjectivity": 0.0
-            },
-            "intent": null,
-            "empathy_detected": true
-        }
-    ]
+            {
+                "text": "Myntra",
+                "label": "GPE"
+            }
+        ]
+    }
 }

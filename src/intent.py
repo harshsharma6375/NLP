@@ -1,35 +1,58 @@
-def detect_intent(text):
-    text = text.lower()
-    
-    intents = {
-        "greeting": ["hello", "hi ", "hey", "good morning", "good evening"],
-        "closing": ["bye", "goodbye", "see you", "have a nice day"],
-        "complaint": ["problem", "issue", "error", "broken", "fail", "not working", "bad", "worst"],
-        "query": ["what", "how", "where", "when", "why", "?"],
-        "purchase": ["buy", "order", "purchase", "cost", "price"],
-        "feedback": ["thanks", "thank you", "good job", "great", "excellent", "love"]
-    }
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.svm import LinearSVC
+from sklearn.pipeline import Pipeline
+import logging
 
-    detected_intents = []
+logger = logging.getLogger(__name__)
+
+# --- Training Data (Simulated for this standalone module) ---
+TRAIN_DATA = [
+    ("The product is broken and not working", "Complaint"),
+    ("I am facing an issue with my order", "Complaint"),
+    ("This is the worst service ever", "Complaint"),
+    ("It arrived damaged", "Complaint"),
+    ("Where is my order?", "Inquiry"),
+    ("When will it be delivered?", "Inquiry"),
+    ("How do I return this?", "Inquiry"),
+    ("Can you help me with a refund?", "Support Request"),
+    ("I need help resetting my password", "Support Request"),
+    ("Thank you so much", "Feedback"),
+    ("Great service, thanks", "Feedback"),
+    ("You were very helpful", "Feedback"),
+    ("I love this product", "Feedback")
+]
+
+model_pipeline = None
+
+def train_intent_model():
+    """
+    Trains a simple TF-IDF + SVM intent classifier on usage.
+    """
+    global model_pipeline
+    texts, labels = zip(*TRAIN_DATA)
     
-    for intent, keywords in intents.items():
-        for word in keywords:
-            if word in text:
-                detected_intents.append(intent)
-                break  # match one keyword per intent is enough
+    pipeline = Pipeline([
+        ('tfidf', TfidfVectorizer(ngram_range=(1, 2), stop_words='english')),
+        ('clf', LinearSVC())
+    ])
     
-    if not detected_intents:
-        return "general_statement"
-    
-    # Return the most significant found (or all of them joined)
-    # For simplicity, returning the first distinct one that isn't greeting if multiple exist, 
-    # or just comma separated.
-    
-    # Priority: Complaint > Purchase > Query > Feedback > Greeting/Closing
-    priority_order = ["complaint", "purchase", "query", "feedback", "greeting", "closing"]
-    
-    for p in priority_order:
-        if p in detected_intents:
-            return p
-            
-    return detected_intents[0]
+    logger.info("Training Intent Classifier...")
+    pipeline.fit(texts, labels)
+    model_pipeline = pipeline
+
+# Train on import
+train_intent_model()
+
+def detect_intent(text):
+    """
+    Predicts intent using the trained TF-IDF + SVM model.
+    """
+    if not model_pipeline:
+        return "Unknown"
+        
+    try:
+        prediction = model_pipeline.predict([text])[0]
+        return prediction
+    except Exception as e:
+        logger.error(f"Intent prediction failed: {e}")
+        return "General"
