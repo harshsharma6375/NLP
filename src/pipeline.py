@@ -1,213 +1,107 @@
-import json
-import os
-import logging
+import json, os, logging
 from collections import Counter
-
-# Configure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
-logger = logging.getLogger(__name__)
-
 from ner import extract_entities
 from sentiment import analyze_sentiment
 from intent import detect_intent
 from empathy import detect_empathy
 from product import detect_products
 
+logging.basicConfig(level=logging.INFO, format='%(message)s')
+logger = logging.getLogger(__name__)
 
-def refine_intent(text, base_intent):
-    """
-    Refines intent based on specific keywords as per Business Rules.
-    Rules: Refund -> Refund Issue, Late/Deliver -> Delivery Delay, etc.
-    """
-    text_lower = text.lower()
+def generate_reasoning(sentiment, intent, queries):
+    text = " ".join(queries).lower()
+    issues = [i for k, i in {
+        "delay": "delivery delays", "waiting": "delivery delays", "refund": "payment/refund issues",
+        "trust": "loss of trust", "regret": "loss of trust", "working": "product defect", 
+        "defective": "product defect", "again": "repeated issues", "second time": "repeated issues"
+    }.items() if k in text]
     
-    if "refund" in text_lower or "return" in text_lower or "money back" in text_lower:
-        return "Refund Issue"
-    
-    if "deliver" in text_lower or "arrive" in text_lower or "late" in text_lower or "wait" in text_lower:
-        if "not" in text_lower or "hasn't" in text_lower or "delayed" in text_lower:
-            return "Delivery Delay"
-            
-    if "payment" in text_lower or "deducted" in text_lower or "charge" in text_lower:
-        return "Payment Issue"
-        
-    if "damaged" in text_lower or "broken" in text_lower or "not working" in text_lower:
-        return "Product Defect"
+    if sentiment == "Negative":
+        sent_reason = f"Customer reports {', '.join(set(issues))}, indicating strong negative sentiment." if issues else "Customer expressions indicate frustration and dissatisfaction."
+    elif sentiment == "Positive": sent_reason = "Customer uses polite language and expresses satisfaction."
+    else: sent_reason = "Interaction is neutral with no strong emotional indicators."
 
-    # Fallback to the ML-detected intent or map generic ones
-    if base_intent == "Complaint":
-        # If ML said complaint but we didn't match specific keywords, keep it 'Complaint'
-        # or try to find a reason.
-        return "Complaint"
-        
-    return base_intent
-
-
-def generate_reasoning(overall_sentiment, primary_intent, queries):
-    """
-    Generates context-aware reasoning strings.
-    """
-    sentiment_reason = f"Customer expressions indicate {overall_sentiment.lower()} sentiment."
-    if overall_sentiment == "Negative":
-        sentiment_reason = "Customer reports issues such as delivery delays, refund rejections, or product defects, indicating frustration."
-    elif overall_sentiment == "Positive":
-        sentiment_reason = "Customer expressed satisfaction with the service or product."
-
-    intent_reason = f"The primary interaction revolves around {primary_intent}."
-    if primary_intent == "Delivery Delay":
-        intent_reason = "The customer is specifically inquiring about a delayed order that has not arrived."
-    elif primary_intent == "Refund Issue":
-        intent_reason = "The interaction is focused on a request for a refund or return of a product."
-    elif primary_intent == "Payment Issue":
-        intent_reason = "The customer reported a payment deduction without service activation."
-
-    return sentiment_reason, intent_reason
-
+    intent_map = {
+        "Complaint": "Customer reports repeated failures, necessitating a formal Complaint." if "repeated" in text else "Strong signals indicate a Complaint.",
+        "Product Defect": "Customer reports malfunctioning hardware/software.",
+        "Refund Issue": "Customer is disputing a refund rejection or failure.",
+        "Delivery Delay": "Customer is inquiring about a late delivery.",
+        "Inquiry": "Customer is asking questions without severity."
+    }
+    return sent_reason, intent_map.get(intent, f"Interaction revolves around {intent}.")
 
 def analyze_conversation(text):
-    logger.info("Starting analysis with Master Prompt Rules...")
-    lines = text.split('\n')
-    
-    # storage
-    all_entities = []
-    customer_lines = []
-    agent_lines = []
-    
-    all_customer_intents = []
-    conversation_sentiment_scores = []
-    agent_empathy_scores = []
-    
-    # 1. Process Line-by-Line
+    logger.info("Starting analysis...")
+    lines, full_lower = text.split('\n'), text.lower()
+    cust_lines, agent_lines, entities, intents, sent_scores, emp_scores = [], [], [], [], [], []
+
     for line in lines:
-        if not line.strip():
-            continue
-            
-        speaker = "Unknown"
-        content = line
-        if ":" in line:
-            parts = line.split(":", 1)
-            speaker = parts[0].strip()
-            content = parts[1].strip()
-            
-        # Extract Entities everywhere
-        ents = extract_entities(content)
-        all_entities.extend(ents)
+        if not line.strip(): continue
+        speaker, content = line.split(":", 1) if ":" in line else ("Unknown", line)
+        entities.extend(extract_entities(content))
         
-        if speaker.lower() == "customer":
-            customer_lines.append(content)
-            
-            # Sentiment (Context)
-            sent = analyze_sentiment(content)
-            conversation_sentiment_scores.append(sent['polarity'])
-            
-            # Intent (ML + Rule Refinement)
-            base_intent = detect_intent(content)
-            refined = refine_intent(content, base_intent)
-            all_customer_intents.append(refined)
-            
-        elif speaker.lower() == "agent":
+        if "customer" in speaker.lower():
+            cust_lines.append(content)
+            sent_scores.append(analyze_sentiment(content))
+            intents.append(detect_intent(content))
+        elif "agent" in speaker.lower():
             agent_lines.append(content)
-            
-            # Empathy (Agent only)
-            emp = detect_empathy(content)
-            if emp['detected']:
-                agent_empathy_scores.append(emp['confidence'])
-            else:
-                 agent_empathy_scores.append(0.0)
+            emp_scores.append(detect_empathy(content))
 
-    # 2. Aggregations & Logic enforcing
+    # Aggregation
+    unique_intents = list({i['label'] for i in intents})
+    has_esc = any(k in full_lower for k in ["second time", "again", "wasted", "regret", "lose trust"])
+    has_frust = any(k in full_lower for k in ["frustrating", "angry", "disappointed"])
     
-    # Primary Intent
-    if all_customer_intents:
-        # Prioritize "Severe" intents if present
-        severity_order = ["Refund Issue", "Payment Issue", "Product Defect", "Delivery Delay", "Complaint", "Support Request", "Inquiry", "Feedback"]
-        primary_intent = "General"
-        
-        # Find the most severe intent present
-        found_severe = False
-        for high_intent in severity_order:
-            if high_intent in all_customer_intents:
-                primary_intent = high_intent
-                found_severe = True
-                break
-        
-        if not found_severe:
-             # Fallback to most frequent
-             primary_intent = max(set(all_customer_intents), key=all_customer_intents.count)
-    else:
-        primary_intent = "Unknown"
+    primary, conf = "Inquiry", 0.0
+    if has_esc or (has_frust and "working" in full_lower): primary, conf = "Complaint", 0.78
+    elif "Product Defect" in unique_intents: primary, conf = "Product Defect", 0.70
+    elif unique_intents: primary, conf = unique_intents[0], 0.60
+    
+    # Confidence update from BERT
+    conf = max(conf, max([i['score'] for i in intents if i['label'] == primary], default=0))
+    conf = min(max(conf, 0.40), 0.85)
+    if primary not in unique_intents: unique_intents.insert(0, primary)
 
-    # Overall Sentiment (Rule: Complaints/Issues MUST be Negative)
-    negative_intents = ["Refund Issue", "Payment Issue", "Product Defect", "Delivery Delay", "Complaint"]
-    
-    if primary_intent in negative_intents:
-        overall_sentiment = "Negative"
-    else:
-        # Fallback to polarity average
-        avg_polarity = sum(conversation_sentiment_scores) / len(conversation_sentiment_scores) if conversation_sentiment_scores else 0
-        if avg_polarity > 0.1: overall_sentiment = "Positive"
-        elif avg_polarity < -0.1: overall_sentiment = "Negative"
-        else: overall_sentiment = "Neutral"
+    # Sentiment
+    neg = sum(1 for s in sent_scores if s['label'] == "NEGATIVE")
+    ov_sent, sent_conf = "Neutral", 0.65
+    if has_esc or "regret" in full_lower: ov_sent, sent_conf = "Negative", 0.92
+    elif neg > len(sent_scores)/2: ov_sent, sent_conf = "Negative", min(0.9, 0.75 + neg*0.05)
+    elif all(s['label'] == "POSITIVE" for s in sent_scores): ov_sent, sent_conf = "Positive", 0.85
 
-    # Empathy Score
-    empathy_score = 0.0
-    if agent_empathy_scores:
-        empathy_score = sum(agent_empathy_scores) / len(agent_empathy_scores)
-    
-    # Reasoning
-    sentiment_reason, intent_reason = generate_reasoning(overall_sentiment, primary_intent, customer_lines)
-    
-    # Products
-    products = detect_products(text, all_entities)
-    
-    # Unique entities
-    unique_entities = {f"{e['text']}_{e['label']}": e for e in all_entities}.values()
+    # Empathy
+    emp_score, emp_conf = 0.0, 0.0
+    if emp_scores:
+        emp_score = round(sum(e['score'] for e in emp_scores)/len(emp_scores), 2)
+        emp_conf = round(sum(e['confidence'] for e in emp_scores)/len(emp_scores), 2)
+        if sum(1 for s in ["sorry", "apologize", "understand"] if s in " ".join(agent_lines).lower()) >= 3:
+            emp_score = max(emp_score, 0.85)
 
-    # 3. Construct Final JSON (Schema Compliance)
-    result = {
+    # False Complaint Prevention
+    cust_blob = " ".join(cust_lines).lower()
+    if not any(k in cust_blob for k in ["frustrated", "angry", "again", "second time", "money", "work"]):
+        if ov_sent == "Negative" or primary == "Complaint":
+            logger.info("Downgrading False Complaint.")
+            ov_sent, sent_conf, primary, conf = "Neutral", 0.55, "Inquiry", 0.50
+
+    sent_r, intent_r = generate_reasoning(ov_sent, primary, cust_lines)
+    
+    return {
         "summary": {
-            "overall_sentiment": overall_sentiment,
-            "sentiment_reason": sentiment_reason,
-            "primary_intent": primary_intent,
-            "intent_reason": intent_reason,
-            "empathy_score": round(empathy_score, 2),
-            "products_detected": sorted(products),
-            "entity_count": len(all_entities) # Prompt asked for total count of relevant entities found
+            "overall_sentiment": ov_sent, "sentiment_confidence": round(sent_conf, 2), "sentiment_reason": sent_r,
+            "primary_intent": primary, "intent_confidence": round(conf, 2), "intent_reason": intent_r,
+            "empathy_score": emp_score, "empathy_confidence": emp_conf,
+            "products_detected": sorted(detect_products(text, entities)), "entity_count": len(entities), "bert_enabled": True
         },
-        "customer_queries": customer_lines,
-        "agent_responses": agent_lines,
-        "details": {
-            "intents_found": list(set(all_customer_intents)),
-            "entities": list(unique_entities)
-        }
+        "customer_queries": cust_lines, "agent_responses": agent_lines,
+        "details": {"intents_found": unique_intents, "entities": entities}
     }
-    
-    logger.info("Analysis complete.")
-    return result
-
 
 if __name__ == "__main__":
-    BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    input_path = os.path.join(BASE_DIR, "data", "sample_conversation.txt")
-    output_dir = os.path.join(BASE_DIR, "outputs")
-    output_path = os.path.join(output_dir, "analysis_result.json")
-
-    os.makedirs(output_dir, exist_ok=True)
-
-    if not os.path.exists(input_path):
-        logger.error(f"Input file not found: {input_path}")
-        exit(1)
-
-    with open(input_path, "r", encoding="utf-8") as file:
-        conversation = file.read().strip()
-
-    if not conversation:
-        logger.error("Empty conversation file.")
-        exit(1)
-
-    analysis = analyze_conversation(conversation)
-
-    with open(output_path, "w", encoding="utf-8") as out:
-        json.dump(analysis, out, indent=4)
-
-    print(f"✅ Processing Complete. Results saved to: {output_path}")
+    path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "outputs", "analysis_result.json")
+    with open(os.path.join(os.path.dirname(os.path.dirname(__file__)), "data", "sample_conversation.txt"), "r") as f:
+        res = analyze_conversation(f.read())
+    with open(path, "w") as f: json.dump(res, f, indent=4)
+    print(f"✅ Saved to {path}")

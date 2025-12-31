@@ -1,6 +1,5 @@
 import spacy
 
-# Load spaCy model once
 try:
     nlp = spacy.load("en_core_web_sm")
 except OSError:
@@ -9,25 +8,10 @@ except OSError:
     nlp = spacy.load("en_core_web_sm")
 
 def extract_entities(text):
-    """
-    Extracts named entities from text using spaCy.
-    Filters for relevant types: ORG, GPE, PERSON, PRODUCT, DATE, MONEY.
-    """
     doc = nlp(text)
-    entities = []
-    
-    # Define relevant entity labels for this domain
-    RELEVANT_LABELS = {"ORG", "GPE", "PERSON", "PRODUCT", "DATE", "MONEY"}
-
+    labels = {"ORG", "GPE", "PERSON", "PRODUCT", "DATE", "MONEY"}
+    entities = {} # dedup
     for ent in doc.ents:
-        if ent.label_ in RELEVANT_LABELS:
-            entities.append({
-                "text": ent.text,
-                "label": ent.label_
-            })
-
-    # Return unique entities to avoid clutter (deduplication by text+label)
-    # Using a dictionary comprehension to dedup
-    unique_entities = {f"{e['text']}_{e['label']}": e for e in entities}.values()
-    
-    return list(unique_entities)
+        if ent.label_ in labels:
+            entities[f"{ent.text}_{ent.label_}"] = {"text": ent.text, "label": ent.label_}
+    return list(entities.values())

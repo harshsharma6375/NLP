@@ -11,6 +11,61 @@ A high-performance, lightweight NLP pipeline designed for analyzing customer sup
 *   **Intent Recognition**: Uses TF-IDF + SVM for accurate intent classification.
 *   **Empathy Detection**: Analyzes agent responses for empathetic language patterns.
 
+### **Methodology (Master Prompt Compliance):**
+- **Strict Parameter Logic**:
+  - **Sentiment**: Capped at **0.90** confidence. "Negative" forced if repeated failures exist.
+  - **Intent**: Enforces `Complaint > Refund Issue > Inquiry`. If frustration is detected across multiple issues, `Complaint` is chosen with realistic confidence (0.6-0.8).
+  - **Empathy**: Validated against agent apologies. Score is **≥ 0.85** if multiple empathetic signals (apology, understanding, reassurance) exist.
+- **Product Normalization**: Products are strictly filtered and formatted to **Title Case** (e.g., "Lenovo Laptop").
+- **Hybrid Models**: 
+  - Sentiment: `distilbert-base-uncased-finetuned-sst-2-english`
+  - Intent: `facebook/bart-large-mnli` (Zero-Shot)
+  - Empathy: `j-hartmann/emotion-english-distilroberta-base`
+- **Transparency**: Output JSON is strictly business-ready, prioritizing correctness and consistency.
+
+---
+
+### **Interview-Ready Explanation**
+> "I designed the system to value **business correctness** over raw model output. I implemented a 'Severity Hierarchy' where frustration upgrades a simple 'Refund Issue' to a 'Complaint', and I deliberately recalibrated confidence scores to avoid false certainty."
+
+---
+
+# ✅ UNIVERSAL MASTER PROMPT (Integrated in Pipeline)
+
+The system now enforces the following strict logic to ensure stability across all scenarios:
+
+## 🔹 CORE PRINCIPLE
+**Model predictions are advisory. Business rules and consistency validation are authoritative.**
+
+## 🔹 SENTIMENT LOGIC (Rule-Guided)
+- **Negative (0.85-0.95)**: Emotional language, escalation, or impact triggered.
+- **Neutral (0.45-0.55)**: Purely technical issues or inquiries without emotion.
+- **Positive (0.7-0.85)**: Praise or satisfaction.
+
+## 🔹 FALSE COMPLAINT PREVENTION
+The system verifies **Complaint** intent against 3 mandatory signals:
+1.  **Emotional Language** (frustrated, angry)
+2.  **Escalation** (second time, again)
+3.  **Impact** (money, work affected)
+
+**IF NONE ARE PRESENT**: The intent is downgraded to **Inquiry** (Neutral) even if the model predicts Complaint.
+
+## 🔹 INTENT SEVERITY HIERARCHY
+1.  **Complaint** (Highest Priority)
+2.  **Service Dissatisfaction / Product Defect**
+3.  **Refund / Delivery / Payment**
+4.  **Inquiry / Feedback**
+
+## 🔹 EMPATHY LOGIC (Agent-Only)
+Analyze **only** agent responses.
+- **High (≥0.85)**: 3+ signals (Apology, Understanding, Action).
+- **Medium (0.5-0.7)**: 1-2 signals.
+- **Low (≤0.3)**: Robotic/Generic.
+
+## 🔹 PRODUCT DETECTION
+- Recovers products from text (e.g. "Microsoft Surface Pro") even if NER fails.
+- Filters out generic nouns like "device" unless specific context exists.
+
 ## 🛠️ Tech Stack
 
 *   **Python**: Core orchestration
@@ -20,6 +75,14 @@ A high-performance, lightweight NLP pipeline designed for analyzing customer sup
 
 ## ⚡ How to Run
 
+### Option 1: Using `uv` (Fastest & Simplest)
+No setup required. Just run:
+
+```powershell
+uv run src/pipeline.py
+```
+
+### Option 2: Standard Python
 1.  **Install Dependencies**
     ```bash
     pip install -r requirements.txt

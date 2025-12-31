@@ -1,44 +1,43 @@
 {
     "summary": {
-        "overall_sentiment": "Negative",
-        "sentiment_reason": "Customer reports issues such as delivery delays, refund rejections, or product defects, indicating frustration.",
-        "primary_intent": "Refund Issue",
-        "intent_reason": "The interaction is focused on a request for a refund or return of a product.",
-        "empathy_score": 0.6,
+        "overall_sentiment": "Positive",
+        "sentiment_confidence": 0.85,
+        "sentiment_reason": "Customer uses polite language and expresses satisfaction.",
+        "primary_intent": "Feedback",
+        "intent_confidence": 0.6,
+        "intent_reason": "Interaction revolves around Feedback.",
+        "empathy_score": 0.3,
+        "empathy_confidence": 0.89,
         "products_detected": [
-            "Amazon",
-            "Lenovo",
-            "iPhone",
-            "iPhone 14",
-            "laptop"
+            "Samsung Galaxy"
         ],
-        "entity_count": 3
+        "entity_count": 3,
+        "bert_enabled": true
     },
     "customer_queries": [
-        "This is the third time I\u2019m contacting support. My iPhone 14 order from Amazon is still not delivered and no one has given me a clear answer.",
-        "Why was my refund request for the Lenovo laptop rejected? I returned it last week."
+        " The recent update on my Samsung Galaxy phone has really improved battery life.",
+        " I\u00e2\u20ac\u2122m very happy with the performance now."
     ],
     "agent_responses": [
-        "I sincerely apologize for the repeated inconvenience. I completely understand your frustration and I will personally escalate this issue to ensure it gets resolved quickly.",
-        "I understand your concern. The refund was delayed due to a verification issue, but I\u2019ll make sure it\u2019s processed as soon as possible."
+        " That\u00e2\u20ac\u2122s great to hear! Thank you for sharing your feedback.",
+        " We appreciate your support."
     ],
     "details": {
         "intents_found": [
-            "Delivery Delay",
-            "Refund Issue"
+            "Feedback"
         ],
         "entities": [
             {
-                "text": "Amazon",
+                "text": "Samsung Galaxy",
                 "label": "ORG"
             },
             {
-                "text": "Lenovo",
-                "label": "ORG"
+                "text": "I\u00e2\u20ac",
+                "label": "GPE"
             },
             {
-                "text": "last week",
-                "label": "DATE"
+                "text": "That\u00e2\u20ac",
+                "label": "GPE"
             }
         ]
     }

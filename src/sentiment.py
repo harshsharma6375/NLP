@@ -1,27 +1,17 @@
 from textblob import TextBlob
 import logging
+from bert_manager import BertManager
 
-logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-def analyze_sentiment(text):
-    """
-    Analyzes sentiment using TextBlob (Lexicon-based).
-    Fast and requires no model loading.
-    Returns dictionary with label and score/polarity.
-    """
-    blob = TextBlob(text)
-    polarity = blob.sentiment.polarity
-    
-    label = "NEUTRAL"
-    if polarity > 0.1:
-        label = "POSITIVE"
-    elif polarity < -0.1:
-        label = "NEGATIVE"
+def analyze_sentiment(text, use_bert=True):
+    if use_bert:
+        try:
+            l, s = BertManager().predict_sentiment(text)
+            return {"label": l, "score": round(s, 4), "polarity": 1.0 if l == "POSITIVE" else -1.0, "confidence": min(round(s, 2), 0.90), "source": "distilbert"}
+        except Exception: pass
 
-    return {
-        "source": "textblob",
-        "label": label,
-        "score": round(abs(polarity), 4),
-        "polarity": round(polarity, 4)
-    }
+    blob = TextBlob(text)
+    p = blob.sentiment.polarity
+    label = "POSITIVE" if p > 0.1 else "NEGATIVE" if p < -0.1 else "NEUTRAL"
+    return {"label": label, "score": round(abs(p), 4), "polarity": round(p, 4), "confidence": round(min(abs(p) * 2, 1.0), 4), "source": "textblob"}

@@ -1,5 +1,7 @@
 spacy
 textblob
 numpy
+transformers
+torch
 scikit-learn
 pandas
