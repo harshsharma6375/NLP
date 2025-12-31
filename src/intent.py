@@ -1,22 +1,30 @@
 import logging
-from bert_manager import BertManager
-
-INTENT_LABELS = ["Complaint", "Delivery Delay", "Refund Issue", "Payment Issue", "Inquiry", "Feedback", "Service Dissatisfaction"]
-logger = logging.getLogger(__name__)
-
-def detect_intent(text, use_bert=True):
-    if use_bert:
-        try:
-            l, s = BertManager().predict_intent(text, INTENT_LABELS)
-            return {"label": l, "score": round(s, 4), "source": "bert"}
-        except Exception: pass
-
-    text = text.lower()
-    label, score = "Inquiry", 0.5
+def detect_intent(text):
+    t = text.lower()
     
-    if "refund" in text: label, score = "Refund Issue", 0.65
-    elif any(x in text for x in ["late", "deliver", "arrive"]): label, score = "Delivery Delay", 0.65
-    elif any(x in text for x in ["monitor", "price", "cost"]): label, score = "Inquiry", 0.5
-    elif any(x in text for x in ["frustrat", "disappoint", "angry"]): label, score = "Complaint", 0.8
+    # Keywords
+    positive_words = ["happy", "great", "improved", "satisfied", "love"]
+    negative_words = ["bad", "broken", "frustrated", "frustrating", "issue", "slow", "drains", "dies"]
+    
+    implicit_patterns = [
+        "only", "lasts", "after charging", "less than",
+        "takes too long", "not working", "keeps crashing",
+        "one hour", "two hours"
+    ]
+    
+    failure_phrases = [
+        "dies", "drains", "not working", "keeps crashing",
+        "one hour", "two hours"
+    ]
 
-    return {"label": label, "score": score, "source": "keyword"}
+    pos_hits = [w for w in positive_words if w in t]
+    neg_hits = [w for w in negative_words if w in t]
+    implicit_issue = any(p in t for p in implicit_patterns)
+    sarcasm = bool(pos_hits and any(p in t for p in failure_phrases))
+
+    if neg_hits or implicit_issue or sarcasm:
+        return "Complaint", pos_hits, neg_hits, implicit_issue, sarcasm
+    elif pos_hits:
+        return "Feedback", pos_hits, neg_hits, implicit_issue, sarcasm
+    else:
+        return "Inquiry", pos_hits, neg_hits, implicit_issue, sarcasm

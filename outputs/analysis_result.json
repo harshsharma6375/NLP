@@ -1,44 +1,33 @@
 {
+    "session_id": "b45aed84-df24-44f5-866c-eb800b59ebcb",
     "summary": {
-        "overall_sentiment": "Positive",
-        "sentiment_confidence": 0.85,
-        "sentiment_reason": "Customer uses polite language and expresses satisfaction.",
-        "primary_intent": "Feedback",
-        "intent_confidence": 0.6,
-        "intent_reason": "Interaction revolves around Feedback.",
-        "empathy_score": 0.3,
-        "empathy_confidence": 0.89,
+        "overall_sentiment": "Negative",
+        "sentiment_confidence": 0.9,
+        "sentiment_reason": "Customer reports a problem or dissatisfaction with the product.",
+        "primary_intent": "Complaint",
+        "intent_confidence": 0.8,
+        "intent_reason": "Customer interaction indicates Complaint.",
+        "empathy_score": 1.0,
+        "empathy_confidence": 0.85,
         "products_detected": [
             "Samsung Galaxy"
         ],
-        "entity_count": 3,
+        "entity_count": 4,
         "bert_enabled": true
     },
-    "customer_queries": [
-        " The recent update on my Samsung Galaxy phone has really improved battery life.",
-        " I\u00e2\u20ac\u2122m very happy with the performance now."
-    ],
-    "agent_responses": [
-        " That\u00e2\u20ac\u2122s great to hear! Thank you for sharing your feedback.",
-        " We appreciate your support."
-    ],
     "details": {
         "intents_found": [
+            "Complaint",
             "Feedback"
-        ],
-        "entities": [
-            {
-                "text": "Samsung Galaxy",
-                "label": "ORG"
-            },
-            {
-                "text": "I\u00e2\u20ac",
-                "label": "GPE"
-            },
-            {
-                "text": "That\u00e2\u20ac",
-                "label": "GPE"
-            }
         ]
-    }
+    },
+    "customer_queries": [
+        "I used to love my Samsung Galaxy camera.",
+        "Great, after the update the battery dies in just one hour and the phone is slow.",
+        "It lasts only two hours after charging, which is really frustrating."
+    ],
+    "agent_responses": [
+        "I’m sorry to hear that. I understand how frustrating this can be.",
+        "Thank you for sharing your feedback, we will look into this issue."
+    ]
 }

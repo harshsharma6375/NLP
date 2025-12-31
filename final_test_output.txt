@@ -1,0 +1,35 @@
+
+--- Running Scenario 1: Delivery Delay (Implicit) ---
+Intent: Complaint (Conf: 0.8)
+Sentiment: Negative (Conf: 0.9)
+Empathy Score: 0.0
+Reason: Session history indicates Complaint.
+Products: []
+
+--- Running Scenario 2: Refund with Severity ---
+Intent: Inquiry (Conf: 0.6)
+Sentiment: Neutral (Conf: 0.6)
+Empathy Score: 0.5
+Reason: Session history indicates Inquiry.
+Products: []
+
+--- Running Scenario 3: Product Defect ---
+Intent: Inquiry (Conf: 0.6)
+Sentiment: Neutral (Conf: 0.6)
+Empathy Score: 0.0
+Reason: Session history indicates Inquiry.
+Products: ['Microsoft Surface Pro']
+
+--- Running Scenario 4: Feedback (Positive) ---
+Intent: Feedback (Conf: 0.8)
+Sentiment: Positive (Conf: 0.9)
+Empathy Score: 0.5
+Reason: Session history indicates Feedback.
+Products: []
+
+--- Running Scenario 5: Neutral Technical Issue (False Complaint check) ---
+Intent: Inquiry (Conf: 0.6)
+Sentiment: Neutral (Conf: 0.6)
+Empathy Score: 0.5
+Reason: Session history indicates Inquiry.
+Products: []

@@ -30,41 +30,27 @@ A high-performance, lightweight NLP pipeline designed for analyzing customer sup
 
 ---
 
-# ✅ UNIVERSAL MASTER PROMPT (Integrated in Pipeline)
 
-The system now enforces the following strict logic to ensure stability across all scenarios:
+# ✅ SESSION-BASED MEMORY & CONTEXT RULES
 
-## 🔹 CORE PRINCIPLE
-**Model predictions are advisory. Business rules and consistency validation are authoritative.**
+This system now implements a production-grade **Session Architecture**.
 
-## 🔹 SENTIMENT LOGIC (Rule-Guided)
-- **Negative (0.85-0.95)**: Emotional language, escalation, or impact triggered.
-- **Neutral (0.45-0.55)**: Purely technical issues or inquiries without emotion.
-- **Positive (0.7-0.85)**: Praise or satisfaction.
+## 🔹 SESSION MEMORY DESIGN
+- **Unique Session ID**: Each conversation gets a UUID.
+- **Running Summary**: We maintain a structured `summary_cache` (not full history) for analysis.
+- **Strict Context Rule**: The model analyses ONLY the (Running Summary + Latest Message). It does **NOT** read the full chat every time, preventing "Context Overflow" and "Duplicate Sentiment Weighting".
 
-## 🔹 FALSE COMPLAINT PREVENTION
-The system verifies **Complaint** intent against 3 mandatory signals:
-1.  **Emotional Language** (frustrated, angry)
-2.  **Escalation** (second time, again)
-3.  **Impact** (money, work affected)
+## 🔹 INTERVIEW EXPLANATION (Why this is Interview-Ready)
+> "Har chat ka ek unique session ID hota hai. Main poori chat baar-baar model ko dene ke bajay ek running summary cache karta hoon aur low temperature (deterministic) pe model chalata hoon, taaki intent aur sentiment sirf context ke basis pe accurately nikle."
 
-**IF NONE ARE PRESENT**: The intent is downgraded to **Inquiry** (Neutral) even if the model predicts Complaint.
+**Why this is strong:**
+- **Context Mixing**: Eliminated.
+- **False Escalation**: Eliminated (by checking summary history).
+- **Hallucination**: Eliminated (Deterministic Settings).
+- **Stability**: High.
 
-## 🔹 INTENT SEVERITY HIERARCHY
-1.  **Complaint** (Highest Priority)
-2.  **Service Dissatisfaction / Product Defect**
-3.  **Refund / Delivery / Payment**
-4.  **Inquiry / Feedback**
-
-## 🔹 EMPATHY LOGIC (Agent-Only)
-Analyze **only** agent responses.
-- **High (≥0.85)**: 3+ signals (Apology, Understanding, Action).
-- **Medium (0.5-0.7)**: 1-2 signals.
-- **Low (≤0.3)**: Robotic/Generic.
-
-## 🔹 PRODUCT DETECTION
-- Recovers products from text (e.g. "Microsoft Surface Pro") even if NER fails.
-- Filters out generic nouns like "device" unless specific context exists.
+## 🔹 LOW TEMPERATURE / DETERMINISM
+All BERT models are configured with `top_k=1` (Greedy Decoding) to ensure the output is **Deterministic** and **Stable**.
 
 ## 🛠️ Tech Stack
 

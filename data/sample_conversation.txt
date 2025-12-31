@@ -1,5 +1,5 @@
-Customer: The recent update on my Samsung Galaxy phone has really improved battery life.
-Customer: I’m very happy with the performance now.
-
-Agent: That’s great to hear! Thank you for sharing your feedback.
-Agent: We appreciate your support.
+Customer: I used to love my Samsung Galaxy camera.
+Customer: Great, after the update the battery dies in just one hour and the phone is slow.
+Customer: It lasts only two hours after charging, which is really frustrating.
+Agent: I’m sorry to hear that. I understand how frustrating this can be.
+Agent: Thank you for sharing your feedback, we will look into this issue.

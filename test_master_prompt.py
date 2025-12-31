@@ -24,9 +24,9 @@ Agent: Have you tried charging it?
 Customer: Yes, it is dead. It stopped working this morning."""
     },
     {
-        "name": "Scenario 4: Polite Inquiry (Low Severity)",
-        "text": """Customer: Hi, does the new laptop come with a warranty?
-Agent: Yes, it comes with 1 year warranty.
+        "name": "Scenario 4: Feedback (Positive)",
+        "text": """Customer: Hi, I am happy with the new laptop performance. Great job!
+Agent: That is great to hear! Thank you for the feedback.
 Customer: Thanks!"""
     },
     {
